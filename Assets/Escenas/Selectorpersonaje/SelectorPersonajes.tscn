@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://bm430dw5afp6x"]
 
-[ext_resource type="Script" uid="uid://br3sg0x5vt6mr" path="res://Assets/Codigos/Selector_de_personajes.gd" id="1_530cs"]
-[ext_resource type="Texture2D" uid="uid://d2hgye73dndcn" path="res://Assets/Personajes/Lum/Lum.png" id="2_sspsk"]
-[ext_resource type="Texture2D" uid="uid://bxyndbjk2kaqg" path="res://Assets/Personajes/Sierv/Sierv.png" id="3_cbyd6"]
+[ext_resource type="Script" uid="uid://br3sg0x5vt6mr" path="res://Assets/Codigos/Selector_de_personajes.gd" id="1_qprc6"]
+[ext_resource type="Texture2D" uid="uid://d2hgye73dndcn" path="res://Assets/Personajes/Lum/Lum.png" id="2_jtdyv"]
+[ext_resource type="Texture2D" uid="uid://bxyndbjk2kaqg" path="res://Assets/Personajes/Sierv/Sierv.png" id="3_vn2mv"]
 
 [node name="Selector de Personaje" type="Control" unique_id=1373439706]
 layout_mode = 3
@@ -11,13 +11,16 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_530cs")
-texturas = Array[Texture2D]([ExtResource("2_sspsk"), ExtResource("3_cbyd6")])
+script = ExtResource("1_qprc6")
+texturas = Array[Texture2D]([ExtResource("2_jtdyv"), ExtResource("3_vn2mv")])
 
 [node name="ColorRect" type="ColorRect" parent="." unique_id=1738149318]
-layout_mode = 0
-offset_right = 426.0
-offset_bottom = 238.0
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 color = Color(0, 1, 1, 1)
 
 [node name="LabelTurno" type="Label" parent="." unique_id=1966888]

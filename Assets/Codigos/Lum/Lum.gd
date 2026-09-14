@@ -17,14 +17,19 @@ func _input(event):
 		if is_on_floor() and estado != "Bloqueando" and estado != "Atacando":
 			estado = "Atacando"
 			ataque_actual = "Ataque_1"
+			desactivar_hitboxes()
 			ani.play(ataque_actual, 1.8)
 			$AnimationPlayer.play(ataque_actual)
 
 	if Input.is_action_just_pressed(inputs["ataque_medio"]):
-		if is_on_floor() and estado != "Bloqueando" and estado != "Atacando":
+		var puede_empezar = is_on_floor() and estado != "Bloqueando" and estado != "Atacando" and estado != "Hit"
+		var puede_cancelar = estado == "Atacando" and ataque_actual == "Ataque_1" and ani.frame >= frame_cancel_debil
+
+		if puede_empezar or puede_cancelar:
 			estado = "Atacando"
 			ataque_actual = "Ataque_2"
-			ani.play(ataque_actual, 1.8)
+			desactivar_hitboxes()
+			ani.play(ataque_actual, 1.0)
 			$AnimationPlayer.play(ataque_actual)
 
 	if Input.is_action_pressed(inputs["bloqueo"]):
@@ -39,8 +44,12 @@ func _physics_process(delta):
 		return
 
 	if Input.is_action_just_pressed(inputs["especial"]):
-		if is_on_floor() and estado != "Atacando" and estado != "Dash":
+		var puede_empezar = is_on_floor() and estado != "Atacando" and estado != "Dash" and estado != "Hit"
+		var puede_cancelar = estado == "Atacando" and ani.frame >= frame_cancel_especial
+		
+		if puede_empezar or puede_cancelar:
 			estado = "Especial"
+			desactivar_hitboxes()
 			ani.play("Especial")
 			$AnimationPlayer.play("Especial")
 
@@ -97,20 +106,26 @@ func _physics_process(delta):
 			if Time_Actual_Dupli >= Time_Dupli:
 				Time_Actual_Dupli = 0
 				crear_duplicado()
-				
+
 		"Hit":
 			if not is_on_floor():
 				velocity.y += intVY * delta
-			else:
-				velocity.y = 0
+			if Input.is_action_just_pressed(inputs["ataque_debil"]):
+				if is_on_floor() and estado != "Bloqueando" and estado != "Atacando" and estado != "Hit":
+					if Input.is_action_just_pressed(inputs["ataque_medio"]):
+						if is_on_floor() and estado != "Bloqueando" and estado != "Atacando" and estado != "Hit":
+							if Input.is_action_pressed(inputs["bloqueo"]):
+								if is_on_floor() and (estado == "Normal" or estado == "Agachado"):
+									pass
+								else:
+									velocity.y = 0
 
 	_animaciones()
 	move_and_slide()
-
+	global_position.x = clamp(global_position.x, limite_izquierdo, limite_derecho)
 # ---------------------------------------------------------
 # ANIMACIONES Y EFECTOS
 # ---------------------------------------------------------
-
 
 	match estado:
 		"Normal":
@@ -125,10 +140,7 @@ func _physics_process(delta):
 			ani.play("Fase1_Agacharse")
 		"Dash":
 			if is_on_floor():
-				if Input.is_action_pressed(inputs["abajo"]):
-					ani.play("Slide", 1.8)
-				else:
-					ani.play("Dash", 2.5)
+				ani.play("Dash", 2.5)
 			else:
 				ani.play("Dash_Aire")
 		"Atacando":
@@ -168,13 +180,6 @@ func _on_animated_sprite_2d_animation_finished() -> void:
 	match ani.animation:
 		"Dash", "Dash_Aire":
 			estado = "Normal"
-			
-		"Slide":
-			if Input.is_action_pressed(inputs["abajo"]):
-				estado = "Agachado"
-			else:
-				estado = "Normal"
-			Can_Dash = 1
 			
 		"Ataque_1":
 			if counter_hit > 1:

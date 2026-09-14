@@ -52,14 +52,14 @@ script = SubResource("GDScript_yn6j3")
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1953120896]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.50200003
-anchor_top = 0.527
-anchor_right = 0.50200003
-anchor_bottom = 0.527
-offset_left = -54.85202
-offset_top = -9.480003
-offset_right = 55.14798
-offset_bottom = 83.52
+anchor_left = 0.521
+anchor_top = 0.611
+anchor_right = 0.521
+anchor_bottom = 0.611
+offset_left = -47.946014
+offset_top = -30.64
+offset_right = 62.053986
+offset_bottom = 62.36
 theme_override_constants/separation = 12
 
 [node name="Jugar" type="Button" parent="VBoxContainer" unique_id=1464578125]

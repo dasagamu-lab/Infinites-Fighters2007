@@ -86,7 +86,7 @@ tracks/0/keys = {
 
 [sub_resource type="Animation" id="Animation_854np"]
 resource_name = "Ataque_P2"
-length = 0.6333333
+length = 0.36666667
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -792,7 +792,7 @@ animations = [{
 }],
 "loop": 0,
 "name": &"Ataque_2P2",
-"speed": 12.0
+"speed": 10.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -821,7 +821,7 @@ animations = [{
 }],
 "loop": 0,
 "name": &"Ataque_P2",
-"speed": 12.0
+"speed": 10.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -1049,7 +1049,6 @@ animations = [{
 texture_filter = 1
 collision_mask = 2
 script = ExtResource("1_m7ys2")
-player_id = 2
 
 [node name="Colision" type="CollisionShape2D" parent="." unique_id=1835770403]
 position = Vector2(0, -0.78125)
@@ -1093,7 +1092,7 @@ z_as_relative = false
 texture_filter = 1
 material = SubResource("ShaderMaterial_lk5v3")
 sprite_frames = SubResource("SpriteFrames_osayh")
-animation = &"Ataque_2P2"
+animation = &"Ataque_P2"
 
 [connection signal="area_entered" from="Hurtbox" to="." method="_on_hurtbox_area_entered"]
 [connection signal="animation_finished" from="AnimationPlayer" to="." method="_on_graficos_animation_finished"]
