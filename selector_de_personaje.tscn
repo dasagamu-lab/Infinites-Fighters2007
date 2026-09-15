@@ -1,0 +1,59 @@
+[gd_scene format=3 uid="uid://cttouqaj3pdku"]
+
+[ext_resource type="Script" uid="uid://br3sg0x5vt6mr" path="res://Assets/Codigos/Selector_de_personajes.gd" id="1_n8ckc"]
+[ext_resource type="Texture2D" uid="uid://d2hgye73dndcn" path="res://Assets/Personajes/Lum/Lum.png" id="2_g0cdb"]
+[ext_resource type="Texture2D" uid="uid://bxyndbjk2kaqg" path="res://Assets/Personajes/Sierv/Sierv.png" id="3_1id5b"]
+
+[node name="Selector de Personaje" type="Control" unique_id=1373439706]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_n8ckc")
+texturas = Array[Texture2D]([ExtResource("2_g0cdb"), ExtResource("3_1id5b")])
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1738149318]
+layout_mode = 0
+offset_right = 426.0
+offset_bottom = 238.0
+color = Color(0, 1, 1, 1)
+
+[node name="LabelTurno" type="Label" parent="." unique_id=1966888]
+layout_mode = 0
+offset_left = 132.0
+offset_top = 15.0
+offset_right = 284.0
+offset_bottom = 57.0
+
+[node name="Vista" type="TextureRect" parent="." unique_id=1918755517]
+layout_mode = 0
+offset_left = 60.0
+offset_top = -77.0
+offset_right = 328.0
+offset_bottom = 198.0
+
+[node name="Anterior" type="Button" parent="." unique_id=1657771259]
+layout_mode = 0
+offset_left = 125.0
+offset_top = 106.0
+offset_right = 143.0
+offset_bottom = 137.0
+text = "<"
+
+[node name="Siguiente" type="Button" parent="." unique_id=1080987958]
+layout_mode = 0
+offset_left = 267.0
+offset_top = 107.0
+offset_right = 285.0
+offset_bottom = 138.0
+text = ">"
+
+[node name="Seleccionar" type="Button" parent="." unique_id=772925701]
+layout_mode = 0
+offset_left = 144.0
+offset_top = 156.0
+offset_right = 268.0
+offset_bottom = 187.0
+text = "Selecionar"

@@ -10,6 +10,9 @@ var rondas_p2 := 0
 var ronda_terminada_ya := false
 var numero_ronda := 1
 
+
+
+
 @onready var barra_p1 = $HUD/Control/BarraVidaP1
 @onready var barra_p2 = $HUD/Control/BarraVidaP2
 @onready var label_marcador = $HUD/Control/LabelMarcador

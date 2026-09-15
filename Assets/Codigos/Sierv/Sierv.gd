@@ -7,8 +7,11 @@ var ataque_actual : String = ""
 
 
 func _input(event):
-	if estado == "Muerto":
+	# Si está muerto o aturdido, ignoramos los botones por completo
+	if estado == "Muerto" or estado == "Hitstun":
 		return
+
+	# ... (aquí sigue tu código normal de ATAQUE DÉBIL, etc.)
 
 	# ATAQUE DÉBIL
 	if Input.is_action_just_pressed(inputs["ataque_debil"]):
@@ -96,8 +99,13 @@ func _physics_process(delta):
 			if Input.is_action_just_released(inputs["salto"]) and velocity.y < 0:
 				velocity.y *= 0.5
 
-		"Agachado", "Bloqueando", "Atacando", "Especial_P2":
+		"Agachado", "Atacando", "Especial":
 			velocity.x = 0
+			velocity.y = 0
+
+		"Bloqueando":
+			# Permite que el retroceso del bloqueo se deslice y frene suavemente
+			velocity.x = move_toward(velocity.x, 0, 1000 * delta)
 			velocity.y = 0
 
 		"Dash_P2":
@@ -190,23 +198,26 @@ func crear_duplicado():
 
 func _on_animated_sprite_2d_animation_finished() -> void:
 	match ani.animation:
-		"Dash_P2", "Dash_Aire":
+		"Dash", "Dash_Aire", "Dash_P2":
 			estado = "Normal"
 			
-		"Ataque_P2":
+		"Ataque_1", "Ataque_P2":
 			if counter_hit > 1:
 				counter_hit = 0
-				ani.play("Ataque_P2")
+				ani.play(ani.animation)
 			else:
 				counter_hit = 0
 				estado = "Normal"
 				
-		"Ataque_2P2":
+		"Ataque_2", "Ataque_2P2":
 			counter_hit = 0
 			estado = "Normal"
 			
-		"Especial_P2":
+		"Especial", "Especial_P2":
 			estado = "Normal"
 			
 		"Hit":
-			estado = "Normal"
+			# ¡DEJAMOS ESTO EN PASS! 
+			# Ya no forzamos el estado a Normal aquí.
+			# El temporizador de la función Hit() en el Padre se encargará de esto.
+			pass

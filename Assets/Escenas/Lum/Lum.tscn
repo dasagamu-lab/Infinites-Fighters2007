@@ -419,7 +419,7 @@ animations = [{
 }],
 "loop": 0,
 "name": &"Ataque_2",
-"speed": 10.0
+"speed": 12.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -635,6 +635,7 @@ animations = [{
 texture_filter = 1
 collision_mask = 2
 script = ExtResource("1_857ei")
+"duración_hitstun" = 0.37
 
 [node name="Colision" type="CollisionShape2D" parent="." unique_id=1835770403]
 position = Vector2(-0.25, 0)
@@ -674,8 +675,7 @@ libraries/ = SubResource("AnimationLibrary_46oj4")
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=2098702610]
 material = SubResource("ShaderMaterial_yehu8")
 sprite_frames = SubResource("SpriteFrames_vhphb")
-animation = &"Ataque_1"
-frame = 1
+animation = &"Idle"
 
 [connection signal="area_entered" from="Hurtbox" to="." method="_on_hurtbox_area_entered"]
 [connection signal="animation_finished" from="AnimatedSprite2D" to="." method="_on_animated_sprite_2d_animation_finished"]
