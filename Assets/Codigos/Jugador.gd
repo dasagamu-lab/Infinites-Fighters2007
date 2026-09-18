@@ -4,9 +4,16 @@ class_name Jugador
 signal vida_cambiada(nueva_vida: int)
 
 @export var player_id : int = 1
-
+var HitSpark = preload("res://Assets/Escenas/HitSpark.tscn")
 # Diccionario de controles: qué acción de Input usa este jugador
 var inputs := {}
+
+
+func crear_hit_spark(posicion: Vector2, color: Color = Color(1, 1, 0.6, 1.0)):
+	var spark = HitSpark.instantiate()
+	spark.global_position = posicion
+	spark.color = color
+	get_tree().current_scene.add_child(spark)
 
 func _ready():
 	if player_id == 1:
@@ -74,11 +81,31 @@ func desactivar_hitboxes():
 @export var fuerza_golpe : int = 120
 @export var duración_hitstun : float = 0.35 # Modifica el tiempo base desde el Inspector de Godot
 
+@export_category("Daño de ataques")
+@export var daño_ataque_debil : int = 10
+@export var daño_ataque_medio : int = 20
+@export var daño_especial : int = 30
+
+var tipo_ataque_actual : String = "debil"
+
 # ESTADOS GLOBALES
 var estado : String = "Normal"
 var intMove : int = 0
 var Can_Dash : int = 2
 var id_hitstun_actual : int = 0 # Identificador para gestionar el reinicio de aturdimiento en combos
+
+func configurar_ataque(tipo: String) -> void:
+	tipo_ataque_actual = tipo
+
+
+func obtener_daño_actual() -> int:
+	match tipo_ataque_actual:
+		"medio":
+			return daño_ataque_medio
+		"especial":
+			return daño_especial
+		_:
+			return daño_ataque_debil
 
 # NODOS VISUALES
 @onready var ani = $AnimatedSprite2D
@@ -143,19 +170,21 @@ func _on_hurtbox_area_entered(area: Area2D):
 		# --- NUEVA LÓGICA DE BLOQUEO ---
 		if estado == "Bloqueando":
 			print(name + " ¡BLOQUEÓ EL GOLPE EXITOSAMENTE!")
-			
-			# Opcional: Un mini impacto visual/sonoro de bloqueo
-			aplicar_hit_stop(0.05, 0.5) # Impacto muy leve
-			
-			# Retroceso de bloqueo (Pushback para que no se quede pegado)
+			aplicar_hit_stop(0.05, 0.5)
+			sacudir_camara(0.5, 0.05)
+			var punto_contacto = (area.global_position + global_position) / 2.0
+			punto_contacto.y -= 60  # sube el punto a la altura del torso — ajusta este número a ojo
+			crear_hit_spark(punto_contacto)
 			var dir_empuje = 1 if area.global_position.x < global_position.x else -1
-			velocity.x = dir_empuje * (fuerza_golpe * 0.9) # Empuje más suave que un hit normal
-			
+			velocity.x = dir_empuje * (fuerza_golpe * 0.9)
 			return # Corta aquí para que NO reciba daño ni entre en Hitstun
 		# -------------------------------
 
 		# Si NO está bloqueando, recibe el golpe normal:
 		var daño_recibido = 10
+		var atacante = area.get_parent()
+		if atacante != null and atacante.has_method("obtener_daño_actual"):
+			daño_recibido = atacante.obtener_daño_actual()
 		if "daño" in area:
 			daño_recibido = area.daño
 
@@ -167,6 +196,7 @@ func _on_hurtbox_area_entered(area: Area2D):
 		vida_cambiada.emit(vida)
 		aplicar_hit_stop()
 		sacudir_camara()   
+		crear_hit_spark(global_position)
 		
 		if vida <= 0:
 			vida = 0
@@ -175,27 +205,11 @@ func _on_hurtbox_area_entered(area: Area2D):
 		else:
 			Hit(area.global_position, tiempo_hitstun)
 
+# Corta la ejecución de físicas normales y movimientos controlados por el jugador
 
-func _physics_process(delta):
-	# Si está aturdido, solo procesa desaceleración y gravedad, cancelando las demás acciones
-	if estado == "Hitstun":
-		velocity.x = move_toward(velocity.x, 0, 800 * delta)
-		
-		if not is_on_floor():
-			velocity.y += 980 * delta
-			
-		move_and_slide()
-		return # Corta la ejecución de físicas normales y movimientos controlados por el jugador
-
-
-func _unhandled_input(event):
-	# Bloqueo total de teclas/entradas durante el Hitstun o Muerte
-	if estado == "Hitstun" or estado == "Muerto":
-		return
 
 	# Si tu script tiene funciones de ataque asociadas a inputs, procesalas aquí abajo:
 	# (Ejemplo: if event.is_action_pressed(inputs["ataque_debil"]): atacar_debil())
-
 
 func _animaciones():
 	if intMove == -1:

@@ -1,40 +1,41 @@
 extends Jugador
 class_name Sierv
 
-# ATAQUES
+# Sierv hereda de Jugador la vida, movimiento base, colisiones, hitstun y daño.
+# Este script adapta esos sistemas a las animaciones y acciones de Sierv/P2.
 var counter_hit : int = 0
 var ataque_actual : String = ""
 
 
 func _input(event):
-	# Si está muerto o aturdido, ignoramos los botones por completo
+	# No se aceptan nuevas acciones mientras Sierv está muerto o en hitstun.
 	if estado == "Muerto" or estado == "Hitstun":
 		return
 
-	# ... (aquí sigue tu código normal de ATAQUE DÉBIL, etc.)
-
-	# ATAQUE DÉBIL
+	# Ataque débil: su daño se toma de daño_ataque_debil en Sierv.tscn.
 	if Input.is_action_just_pressed(inputs["ataque_debil"]):
 		if is_on_floor() and estado != "Bloqueando" and estado != "Atacando":
 			estado = "Atacando"
+			configurar_ataque("debil")
 			ataque_actual = "Ataque_P2"
 			ani.play(ataque_actual, 1.8)
 			desactivar_hitboxes()
 			$AnimationPlayer.play(ataque_actual)
 
-	# ATAQUE MEDIO
+	# Ataque medio: puede comenzar desde reposo o cancelar el ataque débil.
 	if Input.is_action_just_pressed(inputs["ataque_medio"]):
-		var puede_empezar = is_on_floor() and estado != "Bloqueando" and estado != "Atacando" and estado != "Hit"
+		var puede_empezar = is_on_floor() and estado != "Bloqueando" and estado != "Atacando" and estado != "Hitstun"
 		var puede_cancelar = estado == "Atacando" and ataque_actual == "Ataque_P2" and ani.frame >= frame_cancel_debil
 
 		if puede_empezar or puede_cancelar:
 			estado = "Atacando"
+			configurar_ataque("medio")
 			ataque_actual = "Ataque_2P2"
 			ani.play(ataque_actual, 1.0)
 			desactivar_hitboxes()
 			$AnimationPlayer.play(ataque_actual)
 
-	# BLOQUEO
+	# Bloqueo: solo está disponible en el suelo desde Normal o Agachado.
 	if Input.is_action_pressed(inputs["bloqueo"]):
 		if is_on_floor() and (estado == "Normal" or estado == "Agachado"):
 			estado = "Bloqueando"
@@ -44,15 +45,27 @@ func _input(event):
 
 
 func _physics_process(delta):
+	# Procesa la física, la FSM y las animaciones propias de Sierv.
 	if estado == "Muerto":
+		return
+
+	if estado == "Hitstun":
+		# Durante el hitstun se bloquean las acciones normales. Solo se aplica
+		# el frenado del retroceso y la gravedad cuando está en el aire.
+		velocity.x = move_toward(velocity.x, 0, 800 * delta)
+		if not is_on_floor():
+			velocity.y += 980 * delta
+		move_and_slide()
 		return
 		
 	if Input.is_action_just_pressed(inputs["especial"]):
-		var puede_empezar = estado != "Atacando" and estado != "Dash_P2" and estado != "Hit"
+		# El especial cambia a Especial_P2 y usa sus animaciones de P2.
+		var puede_empezar = estado != "Atacando" and estado != "Dash_P2" and estado != "Hitstun"
 		var puede_cancelar = estado == "Atacando" and ani.frame >= frame_cancel_especial
 
 		if puede_empezar or puede_cancelar:
 			estado = "Especial_P2"
+			configurar_ataque("especial")
 			desactivar_hitboxes()
 #			crear_especial()
 
@@ -64,8 +77,9 @@ func _physics_process(delta):
 	elif Input.is_action_just_released(inputs["abajo"]) and is_on_floor() and estado == "Agachado":
 		estado = "Normal"
 
-	# Movimiento
-	if estado != "Bloqueando" and estado != "Atacando" and estado != "Especial_P2" and estado != "Hit":
+	# Movimiento: los estados de ataque, bloqueo, especial y hitstun no aceptan
+	# entradas horizontales normales.
+	if estado != "Bloqueando" and estado != "Atacando" and estado != "Especial_P2" and estado != "Hitstun":
 		if Input.is_action_pressed(inputs["derecha"]):
 			intMove = 1
 		elif Input.is_action_pressed(inputs["izquierda"]):
@@ -75,14 +89,15 @@ func _physics_process(delta):
 	else:
 		intMove = 0
 
-	# Dash
+	# Dash: consume una carga y desplaza a Sierv según la dirección que mira.
 	if Input.is_action_just_pressed(inputs["dash"]) and Can_Dash > 0 and estado != "Bloqueando":
 		estado = "Dash_P2"
 		Can_Dash -= 1
 
-	# MAQUINA DE ESTADOS
+	# Máquina de estados principal de Sierv.
 	match estado:
 		"Normal":
+			# Movimiento, salto, gravedad y coyote time normales.
 			if is_on_floor():
 				coyote_time = max_coyote_time
 				velocity.y = 0
@@ -100,15 +115,18 @@ func _physics_process(delta):
 				velocity.y *= 0.5
 
 		"Agachado", "Atacando", "Especial":
+			# Estas acciones detienen el movimiento normal.
 			velocity.x = 0
 			velocity.y = 0
 
 		"Bloqueando":
+			# El bloqueo permite deslizarse y frena progresivamente el retroceso.
 			# Permite que el retroceso del bloqueo se deslice y frene suavemente
 			velocity.x = move_toward(velocity.x, 0, 1000 * delta)
 			velocity.y = 0
 
 		"Dash_P2":
+			# Desplazamiento rápido y creación de duplicados visuales.
 			Time_Actual_Dupli += delta
 			velocity.y = 0
 			var dir = sign(mirror.scale.x)
@@ -118,16 +136,6 @@ func _physics_process(delta):
 				Time_Actual_Dupli = 0
 				crear_duplicado()
 				
-		"Hit":
-			if not is_on_floor():
-				velocity.y += intVY * delta
-				if Input.is_action_just_pressed(inputs["ataque_debil"]):
-					if is_on_floor() and estado != "Bloqueando" and estado != "Atacando" and estado != "Hit":
-						if Input.is_action_just_pressed(inputs["ataque_medio"]):
-							if is_on_floor() and estado != "Bloqueando" and estado != "Atacando" and estado != "Hit":
-								pass
-			else:
-				velocity.y = 0
 
 	_animaciones()
 	move_and_slide()
@@ -135,6 +143,7 @@ func _physics_process(delta):
 
 
 
+	# Selección de animaciones según el estado actual.
 	match estado:
 		"Normal":
 			if is_on_floor():
@@ -163,9 +172,6 @@ func _physics_process(delta):
 		"Especial_P2":
 			ani.play("Especial_P2")
 
-		"Hit":
-			if ani.animation != "Hit":
-				ani.play("Hit")
 
 
 #func crear_especial():
@@ -179,6 +185,7 @@ func _physics_process(delta):
 
 
 func crear_duplicado():
+	# Crea una copia semitransparente durante el dash.
 	var duplicado = $AnimatedSprite2D.duplicate(true)
 
 	duplicado.material = $AnimatedSprite2D.material.duplicate(true)
@@ -197,6 +204,7 @@ func crear_duplicado():
 
 
 func _on_animated_sprite_2d_animation_finished() -> void:
+	# Al finalizar una acción, la animación devuelve a Sierv al estado normal.
 	match ani.animation:
 		"Dash", "Dash_Aire", "Dash_P2":
 			estado = "Normal"
@@ -216,8 +224,3 @@ func _on_animated_sprite_2d_animation_finished() -> void:
 		"Especial", "Especial_P2":
 			estado = "Normal"
 			
-		"Hit":
-			# ¡DEJAMOS ESTO EN PASS! 
-			# Ya no forzamos el estado a Normal aquí.
-			# El temporizador de la función Hit() en el Padre se encargará de esto.
-			pass
