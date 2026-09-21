@@ -113,16 +113,13 @@ func actualizar_marcador():
 	label_marcador.text = str(rondas_p1) + "   -   " + str(rondas_p2)
 
 func reiniciar_ronda():
-	jugador1.vida = 100
-	jugador1.estado = "Normal"
-	jugador1.global_position = $Spawn1.global_position
-	jugador1.mirar_hacia(1)
+	# Los proyectiles de la ronda anterior no deben sobrevivir al reinicio.
+	get_tree().call_group("proyectiles", "queue_free")
+
+	jugador1.reiniciar_para_ronda($Spawn1.global_position, 1)
 	barra_p1.value = 100
 
-	jugador2.vida = 100
-	jugador2.estado = "Normal"
-	jugador2.global_position = $Spawn2.global_position
-	jugador2.mirar_hacia(-1)
+	jugador2.reiniciar_para_ronda($Spawn2.global_position, -1)
 	barra_p2.value = 100
 
 	ronda_terminada_ya = false

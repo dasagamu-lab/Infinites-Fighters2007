@@ -897,6 +897,7 @@ shape = SubResource("RectangleShape2D_sx5k5")
 debug_color = Color(0.16317675, 0.23452586, 0.29956064, 0.41960785)
 
 [node name="Col_Daño" type="Area2D" parent="." unique_id=2050569901 groups=["P_Punch"]]
+visible = false
 collision_layer = 8
 collision_mask = 0
 

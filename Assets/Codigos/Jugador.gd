@@ -16,6 +16,10 @@ func crear_hit_spark(posicion: Vector2, color: Color = Color(1, 1, 0.6, 1.0), ta
 	get_tree().current_scene.add_child(spark)
 
 func _ready():
+	# Ninguna zona de daño debe estar activa al aparecer el jugador. Las
+	# animaciones habilitan únicamente la hitbox necesaria cuando un ataque inicia.
+	desactivar_hitboxes()
+
 	if player_id == 1:
 		$Hurtbox.collision_layer = 2    # Hurtbox_P1
 		$Hurtbox.collision_mask = 16    # detecta ataques de P2
@@ -73,16 +77,16 @@ var sprite_pos_atacando = Vector2.ZERO
 var frame_cancel_especial : int = 3 
 
 func desactivar_hitboxes():
-	$Col_Daño/Ataque_1.disabled = true
-	$Col_Daño/Ataque_2.disabled = true
+	$Col_Daño/Ataque_1.set_deferred("disabled", true)
+	$Col_Daño/Ataque_2.set_deferred("disabled", true)
 	# No todos los personajes tienen una hitbox especial de estocada.
 	# Se busca de forma segura para no romper escenas como la de Sierv.
 	var hitbox_estocada = get_node_or_null("Col_Daño/Estocada")
 	if hitbox_estocada != null:
-		hitbox_estocada.disabled = true
+		hitbox_estocada.set_deferred("disabled", true)
 	var hitbox_antiaereo = get_node_or_null("Col_Daño/Antiaereo")
 	if hitbox_antiaereo != null:
-		hitbox_antiaereo.disabled = true
+		hitbox_antiaereo.set_deferred("disabled", true)
 
 # ESTADÍSTICAS GLOBALES (Configurables desde el Inspector)
 @export var vida : int = 100
@@ -103,6 +107,7 @@ func desactivar_hitboxes():
 
 var tipo_ataque_actual : String = "debil"
 var tiempo_impacto_bloqueo : float = 0.0
+static var hit_stops_activos : int = 0
 
 # ESTADOS GLOBALES
 var estado : String = "Normal"
@@ -124,18 +129,19 @@ func obtener_daño_actual() -> int:
 			return daño_ataque_debil
 
 
-func nombre_animacion_bloqueo() -> String:
-	return "Bloqueo" if player_id == 1 else "Bloqueo_P2"
+func obtener_animacion_bloqueo() -> String:
+	# Lum comparte "Bloqueo" entre P1 y P2; Sierv usa "Bloqueo_P2".
+	if ani.sprite_frames.has_animation("Bloqueo"):
+		return "Bloqueo"
+	return "Bloqueo_P2"
 
 
 func iniciar_animacion_bloqueo() -> void:
-	var animacion = nombre_animacion_bloqueo()
-	if ani.sprite_frames and ani.sprite_frames.has_animation(animacion):
-		ani.play(animacion)
+	ani.play(obtener_animacion_bloqueo())
 
 
 func mantener_animacion_bloqueo() -> void:
-	var animacion = nombre_animacion_bloqueo()
+	var animacion = obtener_animacion_bloqueo()
 	if ani.animation != animacion:
 		ani.play(animacion)
 
@@ -185,9 +191,29 @@ func reaccionar_bloqueo(area: Area2D) -> void:
 
 
 func aplicar_hit_stop(duracion: float = 0.20, escala: float = 0.06):
-	Engine.time_scale = escala
+	hit_stops_activos += 1
+	Engine.time_scale = min(Engine.time_scale, escala)
 	await get_tree().create_timer(duracion, false, false, true).timeout
-	Engine.time_scale = 1.0
+	hit_stops_activos -= 1
+	if hit_stops_activos == 0:
+		Engine.time_scale = 1.0
+
+
+func reiniciar_para_ronda(posicion_inicial: Vector2, direccion_inicial: int) -> void:
+	# Cancela cualquier hitstun pendiente y limpia el estado compartido antes
+	# de la siguiente ronda.
+	id_hitstun_actual += 1
+	vida = 100
+	estado = "Normal"
+	velocity = Vector2.ZERO
+	intMove = 0
+	Can_Dash = 1
+	coyote_time = 0.0
+	tiempo_impacto_bloqueo = 0.0
+	desactivar_hitboxes()
+	global_position = posicion_inicial
+	mirar_hacia(direccion_inicial)
+	ani.play("Idle")
 
 func sacudir_camara(intensidad: float = 1, duracion: float = 0.1):
 	var camara = get_tree().get_first_node_in_group("camara_principal")

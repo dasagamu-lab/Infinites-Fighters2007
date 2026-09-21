@@ -362,7 +362,7 @@ func procesar_antiaereo(delta: float) -> void:
 	if tiempo_antiaereo >= duracion_antiaereo:
 		desactivar_hitboxes()
 		$AnimationPlayer.stop()
-		$Col_Daño/Antiaereo.disabled = true
+		$Col_Daño/Antiaereo.set_deferred("disabled", true)
 		estado = "Normal"
 		ani.play("Idle")
 
@@ -389,16 +389,20 @@ func Hit(posicion_atacante = null, tiempo: float = -1.0):
 	# sus hitboxes y cualquier animación que pudiera seguir activa.
 	desactivar_hitboxes()
 	if has_node("AnimationPlayer"):
-		$AnimationPlayer.stop()
+		# Al detener la animación, esta puede actualizar pistas de colisión.
+		# Se aplaza para no cambiar hitboxes desde la señal area_entered.
+		$AnimationPlayer.call_deferred("stop")
 	super.Hit(posicion_atacante, tiempo)
 
 func crear_especial():
 	# Instancia el proyectil especial, lo coloca en la posición de Lum y le
-	# asigna la dirección actual para que avance hacia el lado correcto.
+	# asigna dirección, daño y capa según el jugador que lo lanzó.
 	var proyectil = Especial.instantiate()
 	proyectil.global_position = global_position
 	var dir = sign(mirror.scale.x)
 	proyectil.direction = dir if dir != 0 else 1
+	proyectil.daño = obtener_daño_actual()
+	proyectil.collision_layer = $Col_Daño.collision_layer
 	get_parent().add_child(proyectil)
 
 func crear_duplicado():
