@@ -1,65 +1,104 @@
 extends Jugador
 class_name Sierv
 
-# Sierv hereda de Jugador la vida, movimiento base, colisiones, hitstun y daño.
-# Este script adapta esos sistemas a las animaciones y acciones de Sierv/P2.
-var counter_hit : int = 0
-var ataque_actual : String = ""
+# ==============================================================================
+# SCRIPT DEL PERSONAJE: SIERV (JUGADOR 2 / LÓGICA DE COMBATE)
+# ==============================================================================
+# Sierv hereda directamente de la clase base 'Jugador', reutilizando:
+# - Sistema de vida, daño y cálculo de golpes.
+# - Físicas base (movimiento horizontal, salto, gravedad, límites de escenario).
+# - Hurtboxes, Hitboxes y gestión de aturdimiento (Hitstun / Hitstop).
+#
+# Este script implementa las acciones exclusivas, animaciones, cancelaciones de
+# combos (gatlings) y la máquina de estados específica de Sierv.
+# ==============================================================================
+
+# Variables de control de combate interno
+var counter_hit : int = 0      # Contador utilizado para registrar repeticiones o encadenamientos de golpes.
+var ataque_actual : String = "" # Almacena el nombre de la animación del ataque que se está ejecutando.
 
 
+# ------------------------------------------------------------------------------
+# PROCESAMIENTO DE ENTRADAS DEL JUGADOR (_input)
+# ------------------------------------------------------------------------------
+# Se encarga de capturar las pulsaciones directas para ataques y bloqueos.
 func _input(event):
-	# No se aceptan nuevas acciones mientras Sierv está muerto o en hitstun.
+	# 1. Filtro de seguridad: Si Sierv está muerto o aturdido (Hitstun), no puede realizar acciones.
 	if estado == "Muerto" or estado == "Hitstun":
 		return
 
-	# Ataque débil: su daño se toma de daño_ataque_debil en Sierv.tscn.
+	# --------------------------------------------------------------------------
+	# ATAQUE DÉBIL (Ataque_P2)
+	# --------------------------------------------------------------------------
 	if Input.is_action_just_pressed(inputs["ataque_debil"]):
+		# Solo se puede iniciar desde el suelo y si no está bloqueando ni atacando previamente.
 		if is_on_floor() and estado != "Bloqueando" and estado != "Atacando":
 			estado = "Atacando"
-			configurar_ataque("debil")
+			configurar_ataque("debil")             # Configura el tipo de daño en la clase Jugador.
 			ataque_actual = "Ataque_P2"
-			ani.play(ataque_actual, 1.8)
-			desactivar_hitboxes()
-			$AnimationPlayer.play(ataque_actual)
+			ani.play(ataque_actual, 1.8)           # Reproduce la animación en el sprite con velocidad 1.8x.
+			desactivar_hitboxes()                  # Apaga hitboxes activas previas por seguridad.
+			$AnimationPlayer.play(ataque_actual)   # El AnimationPlayer sincroniza la activación de la hitbox.
 
-	# Ataque medio: puede comenzar desde reposo o cancelar el ataque débil.
+	# --------------------------------------------------------------------------
+	# ATAQUE MEDIO (Ataque_2P2) / SISTEMA DE CANCELACIÓN (CHAIN COMBO)
+	# --------------------------------------------------------------------------
 	if Input.is_action_just_pressed(inputs["ataque_medio"]):
+		# Condición 1: Inicio neutro (desde el suelo, libre de bloqueo, ataque o hitstun).
 		var puede_empezar = is_on_floor() and estado != "Bloqueando" and estado != "Atacando" and estado != "Hitstun"
+		# Condición 2: Cancelación de ataque débil (si el frame actual del ataque débil superó la ventana de cancelación).
 		var puede_cancelar = estado == "Atacando" and ataque_actual == "Ataque_P2" and ani.frame >= frame_cancel_debil
 
 		if puede_empezar or puede_cancelar:
 			estado = "Atacando"
-			configurar_ataque("medio")
+			configurar_ataque("medio")             # Asigna el multiplicador/valor de daño medio.
 			ataque_actual = "Ataque_2P2"
 			ani.play(ataque_actual, 1.0)
 			desactivar_hitboxes()
 			$AnimationPlayer.play(ataque_actual)
 
-	# Bloqueo: solo está disponible en el suelo desde Normal o Agachado.
+	# --------------------------------------------------------------------------
+	# SISTEMA DE BLOQUEO (DEFENSA)
+	# --------------------------------------------------------------------------
 	if Input.is_action_pressed(inputs["bloqueo"]):
+		# El bloqueo solo se puede activar estando en el suelo desde estado Normal o Agachado.
 		if is_on_floor() and (estado == "Normal" or estado == "Agachado"):
 			estado = "Bloqueando"
+			iniciar_animacion_bloqueo()
 
+	# Al soltar el botón de bloqueo, regresa inmediatamente al estado neutro (Normal).
 	if Input.is_action_just_released(inputs["bloqueo"]) and estado == "Bloqueando":
 		estado = "Normal"
 
 
+# ------------------------------------------------------------------------------
+# BUCLE PRINCIPAL DE FÍSICAS Y MÁQUINA DE ESTADOS (_physics_process)
+# ------------------------------------------------------------------------------
 func _physics_process(delta):
-	# Procesa la física, la FSM y las animaciones propias de Sierv.
+	# 1. Si el personaje ha muerto, se detiene cualquier procesamiento físico.
 	if estado == "Muerto":
 		return
 
+	# 2. Si el personaje recibió un impacto mientras bloqueaba, procesa el retroceso y frena.
+	if procesar_impacto_bloqueo(delta):
+		return
+
+	# 3. Estado de Aturdimiento (Hitstun):
+	#    - Frena gradualmente la velocidad horizontal (frenado por fricción).
+	#    - Aplica gravedad si el golpe lo dejó en el aire.
+	#    - Bloquea cualquier otra acción hasta que expire el timer del aturdimiento.
 	if estado == "Hitstun":
-		# Durante el hitstun se bloquean las acciones normales. Solo se aplica
-		# el frenado del retroceso y la gravedad cuando está en el aire.
 		velocity.x = move_toward(velocity.x, 0, 800 * delta)
 		if not is_on_floor():
 			velocity.y += 980 * delta
 		move_and_slide()
 		return
-		
+
+	# --------------------------------------------------------------------------
+	# ATAQUE ESPECIAL (Especial_P2)
+	# --------------------------------------------------------------------------
 	if Input.is_action_just_pressed(inputs["especial"]):
-		# El especial cambia a Especial_P2 y usa sus animaciones de P2.
+		# Puede iniciarse neutralmente o cancelando un ataque básico tras el frame de cancelación.
 		var puede_empezar = estado != "Atacando" and estado != "Dash_P2" and estado != "Hitstun"
 		var puede_cancelar = estado == "Atacando" and ani.frame >= frame_cancel_especial
 
@@ -67,18 +106,26 @@ func _physics_process(delta):
 			estado = "Especial_P2"
 			configurar_ataque("especial")
 			desactivar_hitboxes()
-#			crear_especial()
 
+	# --------------------------------------------------------------------------
+	# RECUPERACIÓN DE RECURSOS AL TOCAR EL SUELO
+	# --------------------------------------------------------------------------
 	if is_on_floor():
-		Can_Dash = 1
+		Can_Dash = 1  # Restablece la carga disponible para realizar Dash.
 
+	# --------------------------------------------------------------------------
+	# AGACHARSE (CROUCH)
+	# --------------------------------------------------------------------------
 	if Input.is_action_pressed(inputs["abajo"]) and is_on_floor() and estado == "Normal":
 		estado = "Agachado"
 	elif Input.is_action_just_released(inputs["abajo"]) and is_on_floor() and estado == "Agachado":
 		estado = "Normal"
 
-	# Movimiento: los estados de ataque, bloqueo, especial y hitstun no aceptan
-	# entradas horizontales normales.
+	# --------------------------------------------------------------------------
+	# LECTURA DE MOVIMIENTO HORIZONTAL
+	# --------------------------------------------------------------------------
+	# Solo se permite ingresar movimiento horizontal si Sierv no está bloqueando,
+	# atacando, ejecutando un especial o en hitstun.
 	if estado != "Bloqueando" and estado != "Atacando" and estado != "Especial_P2" and estado != "Hitstun":
 		if Input.is_action_pressed(inputs["derecha"]):
 			intMove = 1
@@ -89,15 +136,19 @@ func _physics_process(delta):
 	else:
 		intMove = 0
 
-	# Dash: consume una carga y desplaza a Sierv según la dirección que mira.
+	# --------------------------------------------------------------------------
+	# EJECUCIÓN DE DASH
+	# --------------------------------------------------------------------------
 	if Input.is_action_just_pressed(inputs["dash"]) and Can_Dash > 0 and estado != "Bloqueando":
 		estado = "Dash_P2"
-		Can_Dash -= 1
+		Can_Dash -= 1  # Consume una carga de Dash.
 
-	# Máquina de estados principal de Sierv.
+	# ==========================================================================
+	# MÁQUINA DE ESTADOS FINITOS (FSM) - FÍSICAS Y VELOCIDADES
+	# ==========================================================================
 	match estado:
 		"Normal":
-			# Movimiento, salto, gravedad y coyote time normales.
+			# Manejo de coyote time y gravedad:
 			if is_on_floor():
 				coyote_time = max_coyote_time
 				velocity.y = 0
@@ -105,53 +156,61 @@ func _physics_process(delta):
 				coyote_time -= delta
 				velocity.y += intVY * delta
 
+			# Movimiento horizontal en suelo/aire:
 			velocity.x = (intVX * intMove) * delta if intMove != 0 else 0
 
+			# Salto normal o con tolerancia de coyote time:
 			if Input.is_action_just_pressed(inputs["salto"]):
 				if is_on_floor() or (coyote_time > 0 and velocity.y > 0.01):
 					velocity.y = -Jump_Height
 
+			# Salto de altura variable: soltar el botón corta el salto a la mitad
 			if Input.is_action_just_released(inputs["salto"]) and velocity.y < 0:
 				velocity.y *= 0.5
 
-		"Agachado", "Atacando", "Especial":
-			# Estas acciones detienen el movimiento normal.
+		"Agachado", "Atacando", "Especial_P2":
+			# Los ataques y la postura agachada fijan la velocidad horizontal y vertical a 0
 			velocity.x = 0
 			velocity.y = 0
 
 		"Bloqueando":
-			# El bloqueo permite deslizarse y frena progresivamente el retroceso.
-			# Permite que el retroceso del bloqueo se deslice y frene suavemente
-			velocity.x = move_toward(velocity.x, 0, 1000 * delta)
+			# Permite que el retroceso recibido al bloquear deslice suavemente al personaje
+			velocity.x = move_toward(velocity.x, 0, frenado_bloqueo * delta)
 			velocity.y = 0
 
 		"Dash_P2":
-			# Desplazamiento rápido y creación de duplicados visuales.
+			# Desplazamiento rápido en la dirección a la que mira el sprite (mirror.scale.x)
 			Time_Actual_Dupli += delta
 			velocity.y = 0
 			var dir = sign(mirror.scale.x)
 			velocity.x = (intVX_Dash * dir) * delta
 
+			# Genera sombras residuales (clones/afterimages) a intervalos regulares
 			if Time_Actual_Dupli >= Time_Dupli:
 				Time_Actual_Dupli = 0
 				crear_duplicado()
-				
 
+	# Actualiza la orientación del sprite/hitbox según la dirección
 	_animaciones()
+	
+	# Aplica el movimiento con colisiones cinemáticas
 	move_and_slide()
+	
+	# Mantiene al personaje dentro de los límites del ring / escenario
 	global_position.x = clamp(global_position.x, limite_izquierdo, limite_derecho)
 
-
-
-	# Selección de animaciones según el estado actual.
+	# ==========================================================================
+	# MÁQUINA DE ESTADOS FINITOS (FSM) - SELECCIÓN DE ANIMACIONES VISUALES
+	# ==========================================================================
 	match estado:
 		"Normal":
 			if is_on_floor():
 				if velocity.x == 0:
-					ani.play("Idle", 0.8)
+					ani.play("Idle", 0.8)   # Animación de reposo
 				else:
-					ani.play("Run", 1.1)
+					ani.play("Run", 1.1)    # Animación de carrera
 			else:
+				# Si la velocidad Y es negativa sube (Jump), si es positiva cae (Fall)
 				ani.play("Jump" if velocity.y < 0 else "Fall")
 
 		"Agachado":
@@ -167,25 +226,17 @@ func _physics_process(delta):
 			ani.play(ataque_actual, 1.8)
 
 		"Bloqueando":
-			ani.play("Bloqueo_P2")
+			mantener_animacion_bloqueo()
 
 		"Especial_P2":
 			ani.play("Especial_P2")
 
 
-
-#func crear_especial():
-	#var proyectil = Especial.instantiate()
-	#proyectil.global_position = global_position
-	#if mirror.flip_h:
-	#	proyectil.direction = -1
-	#else:
-	#	proyectil.direction = 1
-	#get_parent().add_child(proyectil)
-
-
+# ------------------------------------------------------------------------------
+# EFECTO VISUAL: SOMBRAS RESIDUALES DURANTE EL DASH (AFTERIMAGES)
+# ------------------------------------------------------------------------------
 func crear_duplicado():
-	# Crea una copia semitransparente durante el dash.
+	# Clona el sprite actual para dejar una estela con shader semitransparente
 	var duplicado = $AnimatedSprite2D.duplicate(true)
 
 	duplicado.material = $AnimatedSprite2D.material.duplicate(true)
@@ -199,17 +250,23 @@ func crear_duplicado():
 
 	get_parent().add_child(duplicado)
 
+	# Espera el tiempo de vida de la estela y la elimina de la memoria
 	await get_tree().create_timer(Time_Life_Dupli).timeout
 	duplicado.queue_free()
 
 
+# ------------------------------------------------------------------------------
+# CONTROL DE FIN DE ANIMACIÓN (_on_animated_sprite_2d_animation_finished)
+# ------------------------------------------------------------------------------
+# Señal emitida automáticamente por el AnimatedSprite2D cuando termina una acción.
 func _on_animated_sprite_2d_animation_finished() -> void:
-	# Al finalizar una acción, la animación devuelve a Sierv al estado normal.
 	match ani.animation:
 		"Dash", "Dash_Aire", "Dash_P2":
+			# Al terminar el dash, regresa a estado neutro
 			estado = "Normal"
 			
 		"Ataque_1", "Ataque_P2":
+			# Si se acumularon repeticiones en counter_hit repite el ataque, si no, vuelve a Normal
 			if counter_hit > 1:
 				counter_hit = 0
 				ani.play(ani.animation)
@@ -223,4 +280,5 @@ func _on_animated_sprite_2d_animation_finished() -> void:
 			
 		"Especial", "Especial_P2":
 			estado = "Normal"
+
 			

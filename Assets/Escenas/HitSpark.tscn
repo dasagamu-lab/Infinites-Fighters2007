@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://ivlyud7bhg3k"]
+
+[ext_resource type="Script" uid="uid://orptjyht2l2u" path="res://Assets/Codigos/HitSpark.gd" id="1_pyu28"]
+
+[node name="Node2D" type="Node2D" unique_id=645935618]
+script = ExtResource("1_pyu28")
