@@ -5,12 +5,14 @@
 [ext_resource type="Texture2D" uid="uid://u6ye81syyawe" path="res://Assets/Personajes/Lum/Jump/Jump_2.png" id="3_46oj4"]
 [ext_resource type="Texture2D" uid="uid://c1hxbq8hapiua" path="res://Assets/Personajes/Lum/Atack1/Atack1-sheet.png" id="3_c7i6l"]
 [ext_resource type="Texture2D" uid="uid://dwg27dcxech30" path="res://Assets/Personajes/Lum/Atack2/Atack2_1-sheet.png" id="3_cadkn"]
+[ext_resource type="Texture2D" uid="uid://cr0ah5xk7drqj" path="res://Assets/Personajes/Lum/Antiaereo/Antiaereo.png" id="3_taukq"]
 [ext_resource type="Texture2D" uid="uid://d5n7f48nshnb" path="res://Assets/Personajes/Lum/Bloqueo/Block_1.png" id="4_hetvs"]
 [ext_resource type="Texture2D" uid="uid://b5y4q8ynd7nqa" path="res://Assets/Personajes/Lum/Idle/Sprites idle1-sheet.png" id="5_nj42s"]
 [ext_resource type="Texture2D" uid="uid://4swmibuoh0ib" path="res://Assets/Personajes/Lum/Dash/Sprites correr10.png" id="5_vhphb"]
 [ext_resource type="Texture2D" uid="uid://c7iuuwtnq8f5f" path="res://Assets/Personajes/Lum/Hit/Damage1-sheet.png" id="6_hetvs"]
 [ext_resource type="Texture2D" uid="uid://cm3mai1avxrxd" path="res://Assets/Personajes/Lum/Jump/Jump_1-sheet.png" id="6_vhphb"]
 [ext_resource type="Texture2D" uid="uid://dxwglbtk3vxho" path="res://Assets/Personajes/Lum/Run/Sprites correr1-sheet.png" id="7_46oj4"]
+[ext_resource type="Texture2D" uid="uid://3bm38fu0k143" path="res://Assets/Personajes/Lum/Estocada/Estocada4.png" id="7_m6t11"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_vi86t"]
 size = Vector2(19.5, 28.75)
@@ -24,9 +26,43 @@ size = Vector2(17.5, 31.25)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_71jhd"]
 size = Vector2(21.875, 48)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_osayh"]
+size = Vector2(20, 2)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_n0xu7"]
+size = Vector2(4.75, 14)
+
+[sub_resource type="Animation" id="Animation_taukq"]
+resource_name = "Antiaereo"
+length = 0.3
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("AnimatedSprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.033333335, 0.06666667, 0.10000001, 0.13333334, 0.16666667, 0.20000002, 0.23333335, 0.2667),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [1, 1, 2, 3, 4, 5, 6, 7, 7]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Col_Daño/Antiaereo:disabled")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.23292007, 0.2723214),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [true, false, true]
+}
+
 [sub_resource type="Animation" id="Animation_hetvs"]
 resource_name = "Ataque_1"
-length = 0.36666667
+length = 0.43333334
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -46,15 +82,15 @@ tracks/1/path = NodePath("AnimatedSprite2D:frame")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.033333335, 0.1, 0.13333334, 0.2, 0.33333334),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
+"times": PackedFloat32Array(0, 0.033333335, 0.1, 0.13333334, 0.2, 0.33333334, 0.4),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1),
 "update": 1,
-"values": [1, 2, 3, 4, 5, 6]
+"values": [1, 2, 3, 4, 5, 6, 7]
 }
 
 [sub_resource type="Animation" id="Animation_vhphb"]
 resource_name = "Ataque_2"
-length = 0.36666667
+length = 0.33333334
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -74,7 +110,7 @@ tracks/1/path = NodePath("AnimatedSprite2D:frame")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.033333335, 0.06666667, 0.10000001, 0.13333334, 0.16666667, 0.23333333, 0.36666667),
+"times": PackedFloat32Array(0, 0.033333335, 0.06666667, 0.10000001, 0.13333334, 0.16666667, 0.23333333, 0.3),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
 "update": 1,
 "values": [1, 1, 2, 3, 4, 5, 6, 7]
@@ -96,6 +132,34 @@ tracks/0/keys = {
 "args": [],
 "method": &"crear_especial"
 }]
+}
+
+[sub_resource type="Animation" id="Animation_m6t11"]
+resource_name = "Estocada"
+length = 0.454
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("AnimatedSprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.06, 0.12, 0.18, 0.24, 0.3, 0.36),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [0, 1, 2, 3, 4, 5, 6]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Col_Daño/Estocada:disabled")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.12, 0.42),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [true, false, true]
 }
 
 [sub_resource type="Animation" id="Animation_nj42s"]
@@ -124,12 +188,38 @@ tracks/1/keys = {
 "update": 1,
 "values": [1]
 }
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Col_Daño/Estocada:disabled")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [true]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Col_Daño/Antiaereo:disabled")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_46oj4"]
 _data = {
+&"Antiaereo": SubResource("Animation_taukq"),
 &"Ataque_1": SubResource("Animation_hetvs"),
 &"Ataque_2": SubResource("Animation_vhphb"),
 &"Especial": SubResource("Animation_46oj4"),
+&"Estocada": SubResource("Animation_m6t11"),
 &"RESET": SubResource("Animation_nj42s")
 }
 
@@ -140,6 +230,38 @@ shader_parameter/r = 0.0
 shader_parameter/g = 0.0
 shader_parameter/b = 0.0
 shader_parameter/mix_color = 0.0
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yg0or"]
+atlas = ExtResource("3_taukq")
+region = Rect2(0, 0, 80, 80)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_poo5f"]
+atlas = ExtResource("3_taukq")
+region = Rect2(80, 0, 80, 80)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cesv5"]
+atlas = ExtResource("3_taukq")
+region = Rect2(160, 0, 80, 80)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cy5lk"]
+atlas = ExtResource("3_taukq")
+region = Rect2(240, 0, 80, 80)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ayo86"]
+atlas = ExtResource("3_taukq")
+region = Rect2(320, 0, 80, 80)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_trdr7"]
+atlas = ExtResource("3_taukq")
+region = Rect2(400, 0, 80, 80)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jwwki"]
+atlas = ExtResource("3_taukq")
+region = Rect2(480, 0, 80, 80)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rqn08"]
+atlas = ExtResource("3_taukq")
+region = Rect2(560, 0, 80, 80)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_k60n8"]
 atlas = ExtResource("3_c7i6l")
@@ -244,6 +366,34 @@ region = Rect2(280, 0, 70, 48)
 [sub_resource type="AtlasTexture" id="AtlasTexture_kvs16"]
 atlas = ExtResource("3_c7i6l")
 region = Rect2(350, 0, 70, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_srbgk"]
+atlas = ExtResource("7_m6t11")
+region = Rect2(0, 0, 100, 60)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_x45gp"]
+atlas = ExtResource("7_m6t11")
+region = Rect2(100, 0, 100, 60)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7ltke"]
+atlas = ExtResource("7_m6t11")
+region = Rect2(200, 0, 100, 60)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_q2txy"]
+atlas = ExtResource("7_m6t11")
+region = Rect2(300, 0, 100, 60)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5ghsj"]
+atlas = ExtResource("7_m6t11")
+region = Rect2(400, 0, 100, 60)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ym8nh"]
+atlas = ExtResource("7_m6t11")
+region = Rect2(500, 0, 100, 60)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_g22rq"]
+atlas = ExtResource("7_m6t11")
+region = Rect2(600, 0, 100, 60)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_vhphb"]
 atlas = ExtResource("6_vhphb")
@@ -401,6 +551,35 @@ region = Rect2(720, 0, 48, 48)
 animations = [{
 "frames": [{
 "duration": 1.0,
+"texture": SubResource("AtlasTexture_yg0or")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_poo5f")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cesv5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cy5lk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ayo86")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_trdr7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jwwki")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rqn08")
+}],
+"loop": 0,
+"name": &"Antiaereo",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
 "texture": SubResource("AtlasTexture_k60n8")
 }, {
 "duration": 1.0,
@@ -521,6 +700,32 @@ animations = [{
 "loop": 0,
 "name": &"Especial",
 "speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_srbgk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_x45gp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7ltke")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_q2txy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5ghsj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ym8nh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_g22rq")
+}],
+"loop": 0,
+"name": &"Estocada",
+"speed": 12.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -671,9 +876,10 @@ animations = [{
 texture_filter = 1
 collision_mask = 2
 script = ExtResource("1_857ei")
+velocidad_estocada = 280.0
+duracion_inicio_estocada = 0.12
+duracion_activa_estocada = 0.3
 "duración_hitstun" = 0.37
-"daño_ataque_medio" = 15
-"daño_especial" = 50
 
 [node name="Colision" type="CollisionShape2D" parent="." unique_id=1835770403]
 position = Vector2(-0.25, 0)
@@ -705,7 +911,18 @@ debug_color = Color(0.914947, 8.29774e-05, 0.714501, 0.42)
 position = Vector2(27.0625, -3)
 shape = SubResource("RectangleShape2D_71jhd")
 disabled = true
-debug_color = Color(0.913725, 0, 0.713726, 0.419608)
+debug_color = Color(3.128499e-07, 0.6470024, 0.19859004, 0.41960785)
+
+[node name="Estocada" type="CollisionShape2D" parent="Col_Daño" unique_id=26972856]
+position = Vector2(34, -4)
+shape = SubResource("RectangleShape2D_osayh")
+disabled = true
+debug_color = Color(1, 0.015980612, 0.02445947, 0.41960785)
+
+[node name="Antiaereo" type="CollisionShape2D" parent="Col_Daño" unique_id=1146693732]
+position = Vector2(16.375, -26)
+shape = SubResource("RectangleShape2D_n0xu7")
+debug_color = Color(0.5920474, 0.53109837, 0.027866358, 0.41960785)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=450208413]
 libraries/ = SubResource("AnimationLibrary_46oj4")
@@ -713,7 +930,7 @@ libraries/ = SubResource("AnimationLibrary_46oj4")
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=2098702610]
 material = SubResource("ShaderMaterial_yehu8")
 sprite_frames = SubResource("SpriteFrames_vhphb")
-animation = &"Ataque_2"
+animation = &"Antiaereo"
 frame = 1
 
 [connection signal="area_entered" from="Hurtbox" to="." method="_on_hurtbox_area_entered"]

@@ -9,7 +9,7 @@ var HitSpark = preload("res://Assets/Escenas/HitSpark.tscn")
 var inputs := {}
 
 
-func crear_hit_spark(posicion: Vector2, color: Color = Color(1, 1, 0.6, 1.0)):
+func crear_hit_spark(posicion: Vector2, color: Color = Color(1, 1, 0.6, 1.0), tamaño: float = 12.0):
 	var spark = HitSpark.instantiate()
 	spark.global_position = posicion
 	spark.color = color
@@ -75,6 +75,14 @@ var frame_cancel_especial : int = 3
 func desactivar_hitboxes():
 	$Col_Daño/Ataque_1.disabled = true
 	$Col_Daño/Ataque_2.disabled = true
+	# No todos los personajes tienen una hitbox especial de estocada.
+	# Se busca de forma segura para no romper escenas como la de Sierv.
+	var hitbox_estocada = get_node_or_null("Col_Daño/Estocada")
+	if hitbox_estocada != null:
+		hitbox_estocada.disabled = true
+	var hitbox_antiaereo = get_node_or_null("Col_Daño/Antiaereo")
+	if hitbox_antiaereo != null:
+		hitbox_antiaereo.disabled = true
 
 # ESTADÍSTICAS GLOBALES (Configurables desde el Inspector)
 @export var vida : int = 100
@@ -86,7 +94,15 @@ func desactivar_hitboxes():
 @export var daño_ataque_medio : int = 20
 @export var daño_especial : int = 30
 
+@export_category("Bloqueo")
+@export var retroceso_bloqueo : float = 45.0
+@export var frenado_bloqueo : float = 1600.0
+@export var duracion_impacto_bloqueo : float = 0.12
+@export var hitstop_bloqueo : float = 0.06
+@export var intensidad_camara_bloqueo : float = 0.7
+
 var tipo_ataque_actual : String = "debil"
+var tiempo_impacto_bloqueo : float = 0.0
 
 # ESTADOS GLOBALES
 var estado : String = "Normal"
@@ -106,6 +122,62 @@ func obtener_daño_actual() -> int:
 			return daño_especial
 		_:
 			return daño_ataque_debil
+
+
+func nombre_animacion_bloqueo() -> String:
+	return "Bloqueo" if player_id == 1 else "Bloqueo_P2"
+
+
+func iniciar_animacion_bloqueo() -> void:
+	var animacion = nombre_animacion_bloqueo()
+	if ani.sprite_frames and ani.sprite_frames.has_animation(animacion):
+		ani.play(animacion)
+
+
+func mantener_animacion_bloqueo() -> void:
+	var animacion = nombre_animacion_bloqueo()
+	if ani.animation != animacion:
+		ani.play(animacion)
+
+
+func procesar_impacto_bloqueo(delta: float) -> bool:
+	if estado != "BloqueoImpacto":
+		return false
+
+	tiempo_impacto_bloqueo -= delta
+	velocity.x = move_toward(velocity.x, 0, frenado_bloqueo * delta)
+	velocity.y = 0
+	move_and_slide()
+	global_position.x = clamp(global_position.x, limite_izquierdo, limite_derecho)
+	mantener_animacion_bloqueo()
+
+	if tiempo_impacto_bloqueo <= 0:
+		estado = "Bloqueando" if Input.is_action_pressed(inputs["bloqueo"]) else "Normal"
+		if estado == "Bloqueando":
+			iniciar_animacion_bloqueo()
+
+	return true
+
+
+func reaccionar_bloqueo(area: Area2D) -> void:
+	if estado != "Bloqueando":
+		return
+
+	var direccion = 1 if area.global_position.x < global_position.x else -1
+	estado = "BloqueoImpacto"
+	tiempo_impacto_bloqueo = duracion_impacto_bloqueo
+	velocity.x = direccion * retroceso_bloqueo
+	velocity.y = 0
+	aplicar_hit_stop(hitstop_bloqueo, 0.08)
+	sacudir_camara(intensidad_camara_bloqueo, hitstop_bloqueo)
+	var punto_contacto = (area.global_position + global_position) / 2.0
+	punto_contacto.y -= 60
+	crear_hit_spark(punto_contacto, Color(0.6, 0.85, 1.0, 1.0))
+	mantener_animacion_bloqueo()
+
+	var tween = create_tween()
+	ani.modulate = Color(1.6, 1.6, 2.0, 1.0)
+	tween.tween_property(ani, "modulate", Color.WHITE, duracion_impacto_bloqueo)
 
 # NODOS VISUALES
 @onready var ani = $AnimatedSprite2D
@@ -170,13 +242,7 @@ func _on_hurtbox_area_entered(area: Area2D):
 		# --- NUEVA LÓGICA DE BLOQUEO ---
 		if estado == "Bloqueando":
 			print(name + " ¡BLOQUEÓ EL GOLPE EXITOSAMENTE!")
-			aplicar_hit_stop(0.05, 0.5)
-			sacudir_camara(0.5, 0.05)
-			var punto_contacto = (area.global_position + global_position) / 2.0
-			punto_contacto.y -= 60  # sube el punto a la altura del torso — ajusta este número a ojo
-			crear_hit_spark(punto_contacto)
-			var dir_empuje = 1 if area.global_position.x < global_position.x else -1
-			velocity.x = dir_empuje * (fuerza_golpe * 0.9)
+			reaccionar_bloqueo(area)
 			return # Corta aquí para que NO reciba daño ni entre en Hitstun
 		# -------------------------------
 
