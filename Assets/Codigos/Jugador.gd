@@ -104,6 +104,7 @@ func desactivar_hitboxes():
 @export var daño_ataque_debil : int = 10
 @export var daño_ataque_medio : int = 20
 @export var daño_especial : int = 30
+@export var daño_counter : int = 40
 
 @export_category("Bloqueo")
 @export var retroceso_bloqueo : float = 45.0
@@ -132,6 +133,8 @@ func obtener_daño_actual() -> int:
 			return daño_ataque_medio
 		"especial":
 			return daño_especial
+		"counter":
+			return daño_counter
 		_:
 			return daño_ataque_debil
 

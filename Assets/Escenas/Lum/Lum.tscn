@@ -717,7 +717,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_npiob")
 }],
-"loop": 0,
+"loop": 2,
 "name": &"Ataque_2",
 "speed": 12.0
 }, {
@@ -762,7 +762,7 @@ animations = [{
 }],
 "loop": 0,
 "name": &"Counter",
-"speed": 30.0
+"speed": 60.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -1059,7 +1059,7 @@ libraries/ = SubResource("AnimationLibrary_46oj4")
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=2098702610]
 material = SubResource("ShaderMaterial_yehu8")
 sprite_frames = SubResource("SpriteFrames_vhphb")
-animation = &"Counter"
+animation = &"Ataque_2"
 frame = 1
 
 [connection signal="area_entered" from="Hurtbox" to="." method="_on_hurtbox_area_entered"]
