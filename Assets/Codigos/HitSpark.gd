@@ -4,9 +4,12 @@ var radio := 3.0
 var color := Color(1, 0, 0, 1.0)  # rojo puro, bien notorio
 
 func _ready():
+	# El tamaño final se calcula desde el radio inicial recibido por el efecto.
+	# Así cada impacto puede tener una escala diferente sin usar un valor fijo.
+	var radio_final = radio * 1.2
 	var tween = create_tween()
 	tween.set_parallel(true)
-	tween.tween_property(self, "radio", 14.0, 0.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(self, "radio", radio_final, 0.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tween.tween_property(self, "modulate:a", 0.0, 0.5)
 	tween.set_parallel(false)
 	tween.tween_callback(queue_free)

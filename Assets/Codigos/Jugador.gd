@@ -13,6 +13,8 @@ func crear_hit_spark(posicion: Vector2, color: Color = Color(1, 1, 0.6, 1.0), ta
 	var spark = HitSpark.instantiate()
 	spark.global_position = posicion
 	spark.color = color
+	spark.radio = tamaño
+	spark.z_index = 20
 	get_tree().current_scene.add_child(spark)
 
 func _ready():
@@ -41,7 +43,8 @@ func _ready():
 			"derecha": "Derecha",
 			"izquierda": "Izquierda",
 			"dash": "Dash",
-			"salto": "Saltar"
+			"salto": "Saltar",
+			"counter": "Counter"
 		}
 	else:
 		inputs = {
@@ -53,7 +56,8 @@ func _ready():
 			"derecha": "Derecha_P2",
 			"izquierda": "Izquierda_P2",
 			"dash": "Dash_P2",
-			"salto": "Salto_P2"
+			"salto": "Salto_P2",
+			"counter": "Counter_P2"
 		}
 
 
@@ -87,6 +91,9 @@ func desactivar_hitboxes():
 	var hitbox_antiaereo = get_node_or_null("Col_Daño/Antiaereo")
 	if hitbox_antiaereo != null:
 		hitbox_antiaereo.set_deferred("disabled", true)
+	var hitbox_counter = get_node_or_null("Col_Daño/Counter")
+	if hitbox_counter != null:
+		hitbox_counter.set_deferred("disabled", true)
 
 # ESTADÍSTICAS GLOBALES (Configurables desde el Inspector)
 @export var vida : int = 100
@@ -177,8 +184,8 @@ func reaccionar_bloqueo(area: Area2D) -> void:
 	aplicar_hit_stop(hitstop_bloqueo, 0.08)
 	sacudir_camara(intensidad_camara_bloqueo, hitstop_bloqueo)
 	var punto_contacto = (area.global_position + global_position) / 2.0
-	punto_contacto.y -= 60
-	crear_hit_spark(punto_contacto, Color(0.6, 0.85, 1.0, 1.0))
+	punto_contacto.y -= 8
+	crear_hit_spark(punto_contacto, Color(0.6, 0.85, 1.0, 1.0), 8.0)
 	mantener_animacion_bloqueo()
 
 	var tween = create_tween()

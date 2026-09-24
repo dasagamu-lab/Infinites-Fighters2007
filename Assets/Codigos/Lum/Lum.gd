@@ -45,6 +45,10 @@ var ataque_actual : String = ""
 @export var duracion_antiaereo : float = 0.36666667
 @export var ventana_antiaereo : float = 0.12
 
+@export_category("Contraataque")
+@export var ventana_counter : float = 0.18
+@export var duracion_counter : float = 0.4
+
 # Cronómetro interno de la estocada actual.
 var tiempo_estocada : float = 0.0
 
@@ -54,6 +58,8 @@ var tiempo_ventana_estocada : float = 0.0
 # Cronómetro de la ventana W + F y de la ejecución del antiaéreo.
 var tiempo_ventana_antiaereo : float = 0.0
 var tiempo_antiaereo : float = 0.0
+var tiempo_counter : float = 0.0
+var counter_exitoso : bool = false
 
 # ---------------------------------------------------------
 # CONTROLES Y FÍSICAS EXCLUSIVAS
@@ -61,8 +67,13 @@ var tiempo_antiaereo : float = 0.0
 func _input(event):
 	# Estos estados tienen prioridad sobre cualquier entrada nueva. Se ignoran
 	# los botones para evitar cancelar una reacción, la muerte o la estocada.
-	if estado == "Muerto" or estado == "Hitstun" or estado == "EstocadaVeloz" or estado == "Antiaereo":
+	if estado == "Muerto" or estado == "Hitstun" or estado == "EstocadaVeloz" or estado == "Antiaereo" or estado == "Counter":
 		return
+
+	if Input.is_action_just_pressed(inputs["counter"]):
+		if is_on_floor() and (estado == "Normal" or estado == "Agachado"):
+			iniciar_counter()
+			return
 
 	if Input.is_action_just_pressed(inputs["ataque_debil"]):
 		# F convierte el salto en antiaéreo si se presiona dentro de la ventana
@@ -152,6 +163,9 @@ func _physics_process(delta):
 		return
 	if estado == "Antiaereo":
 		procesar_antiaereo(delta)
+		return
+	if estado == "Counter":
+		procesar_counter(delta)
 		return
 	# ---------------------------------
 
@@ -384,6 +398,57 @@ func iniciar_antiaereo() -> void:
 	$AnimationPlayer.play("Antiaereo")
 
 
+func procesar_counter(delta: float) -> void:
+	# La animación dura toda la acción. La ventana inicial permite parar el
+	# golpe; la hitbox ofensiva solo se libera si esa parada fue exitosa.
+	tiempo_counter += delta
+	velocity = Vector2.ZERO
+	# Si la parada falla, la pista visual no puede convertir el intento en un
+	# golpe accidental. La hitbox se mantiene apagada durante toda la acción.
+	if not counter_exitoso:
+		$Col_Daño/Counter.set_deferred("disabled", true)
+	move_and_slide()
+
+	if tiempo_counter >= duracion_counter:
+		desactivar_hitboxes()
+		$AnimationPlayer.stop()
+		estado = "Normal"
+		counter_exitoso = false
+		ani.play("Idle")
+
+
+func iniciar_counter() -> void:
+	# Inicia la postura de parada y prepara la animación de respuesta.
+	estado = "Counter"
+	tiempo_counter = 0.0
+	counter_exitoso = false
+	desactivar_hitboxes()
+	configurar_ataque("especial")
+	ani.animation = "Counter"
+	ani.stop()
+	$AnimationPlayer.play("Counter")
+
+
+func ejecutar_counter(_area: Area2D) -> void:
+	# El golpe rival se consume sin aplicar daño y la animación continúa hasta
+	# su ventana ofensiva, donde AnimationPlayer activará la hitbox Counter.
+	counter_exitoso = true
+	configurar_ataque("especial")
+	aplicar_hit_stop(hitstop_bloqueo, 0.08)
+	sacudir_camara(intensidad_camara_bloqueo, hitstop_bloqueo)
+
+
+func _on_hurtbox_area_entered(area: Area2D):
+	# Lum intercepta el golpe durante la ventana de parada antes de delegar la
+	# recepción normal a Jugador.
+	if area.is_in_group("P_Punch") and estado == "Counter" and not counter_exitoso:
+		if tiempo_counter <= ventana_counter:
+			ejecutar_counter(area)
+			return
+		desactivar_hitboxes()
+	super._on_hurtbox_area_entered(area)
+
+
 func Hit(posicion_atacante = null, tiempo: float = -1.0):
 	# Si Lum recibe un golpe durante un ataque o estocada, se cortan de inmediato
 	# sus hitboxes y cualquier animación que pudiera seguir activa.
@@ -392,6 +457,7 @@ func Hit(posicion_atacante = null, tiempo: float = -1.0):
 		# Al detener la animación, esta puede actualizar pistas de colisión.
 		# Se aplaza para no cambiar hitboxes desde la señal area_entered.
 		$AnimationPlayer.call_deferred("stop")
+	counter_exitoso = false
 	super.Hit(posicion_atacante, tiempo)
 
 func crear_especial():
