@@ -15,7 +15,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="Fighters_Infinite_alpha"
-run/main_scene="uid://bm430dw5afp6x"
+run/main_scene="uid://dqa20bbm4lsr8"
 config/features=PackedStringArray("4.7", "Forward Plus")
 
 [autoload]
@@ -37,6 +37,7 @@ run/stretch/mode="disabled"
 [global_group]
 
 P_Punch=""
+pushbox=""
 
 [input]
 
@@ -152,6 +153,7 @@ ataque_medio_P2={
 2d_physics/layer_2="Suelo"
 2d_physics/layer_3="P_Punch"
 2d_physics/layer_4="Enemigo"
+2d_physics/layer_5="Pushbox"
 
 [rendering]
 

@@ -1081,10 +1081,14 @@ animations = [{
 "speed": 12.0
 }]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_13qdw"]
+size = Vector2(20, 27)
+
 [node name="Sierv" type="CharacterBody2D" unique_id=1972453486]
 texture_filter = 1
 collision_mask = 2
 script = ExtResource("1_m7ys2")
+vida = 489
 "daño_especial" = 0
 
 [node name="Colision" type="CollisionShape2D" parent="." unique_id=1835770403]
@@ -1128,7 +1132,18 @@ z_as_relative = false
 texture_filter = 1
 material = SubResource("ShaderMaterial_lk5v3")
 sprite_frames = SubResource("SpriteFrames_osayh")
-animation = &"Bloqueo_P2"
+animation = &"Idle"
+frame = 1
+
+[node name="Pushbox" type="Area2D" parent="." unique_id=1658348786 groups=["pushbox"]]
+collision_layer = 16
+collision_mask = 16
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Pushbox" unique_id=1450196445]
+visible = false
+position = Vector2(0, 1)
+shape = SubResource("RectangleShape2D_13qdw")
+debug_color = Color(8.122064e-08, 0.082261, 0.10362779, 0.41960785)
 
 [connection signal="area_entered" from="Hurtbox" to="." method="_on_hurtbox_area_entered"]
 [connection signal="animation_finished" from="AnimatedSprite2D" to="." method="_on_animated_sprite_2d_animation_finished"]

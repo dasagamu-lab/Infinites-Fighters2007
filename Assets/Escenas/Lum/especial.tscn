@@ -8,7 +8,7 @@ size = Vector2(20, 68)
 
 [node name="Especial" type="Area2D" unique_id=904899015 groups=["P_Punch", "proyectiles"]]
 collision_layer = 8
-collision_mask = 0
+collision_mask = 6
 script = ExtResource("1_f0o0g")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1512545568]
@@ -26,3 +26,6 @@ amount = 500
 spread = 135.62
 initial_velocity_max = 164.63
 color = Color(0.8999233, 0.5073138, 0.15377262, 1)
+
+[connection signal="area_entered" from="." to="." method="_on_area_entered"]
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

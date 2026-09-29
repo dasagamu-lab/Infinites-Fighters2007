@@ -73,6 +73,11 @@ func congelar_jugadores(congelado: bool):
 	jugador1.set_process_input(not congelado)
 	jugador2.set_physics_process(not congelado)
 	jugador2.set_process_input(not congelado)
+	if congelado:
+		if is_instance_valid(jugador1) and jugador1.ani:
+			jugador1.ani.play("Idle")
+		if is_instance_valid(jugador2) and jugador2.ani:
+			jugador2.ani.play("Idle")
 
 func anuncio_ronda():
 	label_anuncio.text = "ROUND " + str(numero_ronda)
