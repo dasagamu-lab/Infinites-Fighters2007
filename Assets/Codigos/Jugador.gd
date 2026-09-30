@@ -13,7 +13,7 @@ var inputs := {}
 @onready var ani = $AnimatedSprite2D
 @onready var mirror = $AnimatedSprite2D
 @onready var anim_player = $AnimationPlayer
-@onready var pushbox = $Pushbox
+@onready var pushbox = get_node_or_null("Pushbox")
 
 enum EstadoFSM {
 	NORMAL, AGACHADO, ATACANDO, BLOQUEANDO, DASH, HITSTUN, ESPECIAL, MUERTO,

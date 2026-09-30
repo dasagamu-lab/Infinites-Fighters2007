@@ -1206,8 +1206,7 @@ libraries/ = SubResource("AnimationLibrary_46oj4")
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=2098702610]
 material = SubResource("ShaderMaterial_yehu8")
 sprite_frames = SubResource("SpriteFrames_vhphb")
-animation = &"Counter"
-frame = 1
+animation = &"Dash_Aire"
 
 [node name="Pushbox" type="Area2D" parent="." unique_id=1658348785 groups=["pushbox"]]
 collision_layer = 16
