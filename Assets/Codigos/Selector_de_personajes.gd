@@ -1,5 +1,7 @@
 extends Control
 
+const ESCENA_ENTRENAMIENTO = "res://Assets/Niveles/Entrenamiento.tscn"
+
 # Nombres tal como están en AdministradorPartida.personajes_disponibles
 @export var personajes : Array[String] = ["Lum", "Sierv"]
 
@@ -30,13 +32,20 @@ func _on_siguiente():
 func actualizar_vista():
 	if texturas.size() > indice:
 		vista.texture = texturas[indice]
-	label_turno.text = "Jugador 1 " if fase == 1 else "Jugador 2 "
+	if AdministradorPartida.modo_entrenamiento:
+		label_turno.text = "Entrenamiento"
+	else:
+		label_turno.text = "Jugador 1 " if fase == 1 else "Jugador 2 "
 
 func _on_seleccionar():
 	var nombre = personajes[indice]
 
 	if fase == 1:
 		AdministradorPartida.elegir_personaje_p1(nombre)
+		# En entrenamiento solo juega el jugador 1 contra el muñeco.
+		if AdministradorPartida.modo_entrenamiento:
+			get_tree().change_scene_to_file(ESCENA_ENTRENAMIENTO)
+			return
 		fase = 2
 		indice = 0
 		actualizar_vista()

@@ -55,6 +55,13 @@
 [ext_resource type="Texture2D" uid="uid://ckxfb8pohhnbh" path="res://Assets/Personajes/Sierv/Jump/Caida1-sheet.png" id="64_k0iib"]
 [ext_resource type="Texture2D" uid="uid://b8wxxsr27t8d8" path="res://Assets/Personajes/Sierv/Idle/Idle_1-sheet.png" id="64_yte2s"]
 [ext_resource type="Texture2D" uid="uid://siynthw7wei" path="res://Assets/Personajes/Sierv/Hit/Hit1-sheet.png" id="65_fvhqr"]
+[ext_resource type="Texture2D" path="res://Assets/Personajes/Sierv/Agarre/Agarre.png" id="agr_Agarre"]
+[ext_resource type="Texture2D" path="res://Assets/Personajes/Sierv/Agarre/Agarre_Sujeta.png" id="agr_Agarre_Sujeta"]
+[ext_resource type="Texture2D" path="res://Assets/Personajes/Sierv/Agarre/Agarre_Lanza.png" id="agr_Agarre_Lanza"]
+[ext_resource type="Texture2D" path="res://Assets/Personajes/Sierv/Agarre/Agarrado.png" id="agr_Agarrado"]
+[ext_resource type="Texture2D" path="res://Assets/Personajes/Sierv/Agarre/Lanzado.png" id="agr_Lanzado"]
+[ext_resource type="Texture2D" path="res://Assets/Personajes/Sierv/Agarre/Derribado.png" id="agr_Derribado"]
+[ext_resource type="Texture2D" path="res://Assets/Personajes/Sierv/Agarre/Levantarse.png" id="agr_Levantarse"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_vi86t"]
 size = Vector2(22.25, 30.4375)
@@ -799,6 +806,78 @@ region = Rect2(400, 0, 80, 48)
 atlas = ExtResource("52_gffp2")
 region = Rect2(480, 0, 80, 48)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_agr_Agarre_0"]
+atlas = ExtResource("agr_Agarre")
+region = Rect2(0, 0, 54, 42)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_agr_Agarre_1"]
+atlas = ExtResource("agr_Agarre")
+region = Rect2(54, 0, 54, 42)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_agr_Agarre_2"]
+atlas = ExtResource("agr_Agarre")
+region = Rect2(108, 0, 54, 42)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_agr_Agarre_Sujeta_0"]
+atlas = ExtResource("agr_Agarre_Sujeta")
+region = Rect2(0, 0, 54, 42)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_agr_Agarre_Sujeta_1"]
+atlas = ExtResource("agr_Agarre_Sujeta")
+region = Rect2(54, 0, 54, 42)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_agr_Agarre_Lanza_0"]
+atlas = ExtResource("agr_Agarre_Lanza")
+region = Rect2(0, 0, 50, 42)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_agr_Agarre_Lanza_1"]
+atlas = ExtResource("agr_Agarre_Lanza")
+region = Rect2(50, 0, 50, 42)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_agr_Agarre_Lanza_2"]
+atlas = ExtResource("agr_Agarre_Lanza")
+region = Rect2(100, 0, 50, 42)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_agr_Agarrado_0"]
+atlas = ExtResource("agr_Agarrado")
+region = Rect2(0, 0, 26, 42)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_agr_Agarrado_1"]
+atlas = ExtResource("agr_Agarrado")
+region = Rect2(26, 0, 26, 42)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_agr_Lanzado_0"]
+atlas = ExtResource("agr_Lanzado")
+region = Rect2(0, 0, 48, 44)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_agr_Lanzado_1"]
+atlas = ExtResource("agr_Lanzado")
+region = Rect2(48, 0, 48, 44)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_agr_Lanzado_2"]
+atlas = ExtResource("agr_Lanzado")
+region = Rect2(96, 0, 48, 44)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_agr_Derribado_0"]
+atlas = ExtResource("agr_Derribado")
+region = Rect2(0, 0, 46, 38)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_agr_Derribado_1"]
+atlas = ExtResource("agr_Derribado")
+region = Rect2(46, 0, 46, 38)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_agr_Levantarse_0"]
+atlas = ExtResource("agr_Levantarse")
+region = Rect2(0, 0, 44, 54)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_agr_Levantarse_1"]
+atlas = ExtResource("agr_Levantarse")
+region = Rect2(44, 0, 44, 54)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_agr_Levantarse_2"]
+atlas = ExtResource("agr_Levantarse")
+region = Rect2(88, 0, 44, 54)
+
 [sub_resource type="SpriteFrames" id="SpriteFrames_osayh"]
 animations = [{
 "frames": [{
@@ -1079,6 +1158,95 @@ animations = [{
 "loop": 0,
 "name": &"Run",
 "speed": 12.0
+}, {
+"frames": [{
+"duration": 0.3,
+"texture": SubResource("AtlasTexture_agr_Agarre_0")
+}, {
+"duration": 0.3,
+"texture": SubResource("AtlasTexture_agr_Agarre_1")
+}, {
+"duration": 2.0,
+"texture": SubResource("AtlasTexture_agr_Agarre_2")
+}],
+"loop": false,
+"name": &"Agarre",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_agr_Agarre_Sujeta_0")
+}, {
+"duration": 2.0,
+"texture": SubResource("AtlasTexture_agr_Agarre_Sujeta_1")
+}],
+"loop": false,
+"name": &"Agarre_Sujeta",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 0.6,
+"texture": SubResource("AtlasTexture_agr_Agarre_Lanza_0")
+}, {
+"duration": 0.8,
+"texture": SubResource("AtlasTexture_agr_Agarre_Lanza_1")
+}, {
+"duration": 1.1,
+"texture": SubResource("AtlasTexture_agr_Agarre_Lanza_2")
+}],
+"loop": false,
+"name": &"Agarre_Lanza",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 0.5,
+"texture": SubResource("AtlasTexture_agr_Agarrado_0")
+}, {
+"duration": 2.5,
+"texture": SubResource("AtlasTexture_agr_Agarrado_1")
+}],
+"loop": false,
+"name": &"Agarrado",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 0.8,
+"texture": SubResource("AtlasTexture_agr_Lanzado_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_agr_Lanzado_1")
+}, {
+"duration": 4.0,
+"texture": SubResource("AtlasTexture_agr_Lanzado_2")
+}],
+"loop": false,
+"name": &"Lanzado",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 0.8,
+"texture": SubResource("AtlasTexture_agr_Derribado_0")
+}, {
+"duration": 1.2,
+"texture": SubResource("AtlasTexture_agr_Derribado_1")
+}],
+"loop": false,
+"name": &"Derribado",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 0.8,
+"texture": SubResource("AtlasTexture_agr_Levantarse_0")
+}, {
+"duration": 0.8,
+"texture": SubResource("AtlasTexture_agr_Levantarse_1")
+}, {
+"duration": 0.9,
+"texture": SubResource("AtlasTexture_agr_Levantarse_2")
+}],
+"loop": false,
+"name": &"Levantarse",
+"speed": 10.0
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_13qdw"]
@@ -1088,7 +1256,6 @@ size = Vector2(20, 27)
 texture_filter = 1
 collision_mask = 2
 script = ExtResource("1_m7ys2")
-vida = 489
 "daño_especial" = 0
 
 [node name="Colision" type="CollisionShape2D" parent="." unique_id=1835770403]

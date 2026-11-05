@@ -60,7 +60,8 @@ offset_left = -47.946014
 offset_top = -30.64
 offset_right = 62.053986
 offset_bottom = 62.36
-theme_override_constants/separation = 12
+grow_horizontal = 2
+theme_override_constants/separation = 6
 
 [node name="Jugar" type="Button" parent="VBoxContainer" unique_id=1464578125]
 texture_filter = 1
@@ -68,7 +69,13 @@ layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_pqr4i")
 text = "JUGAR"
 
-[node name="Opcioines" type="Button" parent="VBoxContainer" unique_id=1291966309]
+[node name="Entrenamiento" type="Button" parent="VBoxContainer"]
+texture_filter = 1
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_pqr4i")
+text = "ENTRENAMIENTO"
+
+[node name="Opciones" type="Button" parent="VBoxContainer" unique_id=1291966309]
 texture_filter = 1
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_u84pd")
@@ -85,5 +92,11 @@ position = Vector2(213, 51.999996)
 scale = Vector2(0.6682243, 0.5555555)
 texture = ExtResource("3_yn6j3")
 
+[node name="OpcionesAviso" type="AcceptDialog" parent="."]
+title = "Opciones"
+dialog_text = "Las opciones aún no están disponibles."
+
 [connection signal="pressed" from="VBoxContainer/Jugar" to="." method="_on_jugar_pressed"]
+[connection signal="pressed" from="VBoxContainer/Entrenamiento" to="." method="_on_entrenamiento_pressed"]
+[connection signal="pressed" from="VBoxContainer/Opciones" to="." method="_on_opciones_pressed"]
 [connection signal="pressed" from="VBoxContainer/Salir" to="." method="_on_salir_pressed"]

@@ -19,6 +19,7 @@ var numero_ronda := 1
 @onready var label_anuncio = $HUD/Control/LabelAnuncio
 @onready var pantalla_victoria = $HUD/Control/PantallaVictoria
 @onready var label_ganador = $HUD/Control/PantallaVictoria/LabelGanador
+@onready var camara = $Camera2D
 
 # Referencias directas al Menú de Pausa
 @onready var menu_pausa = $MenuPausa
@@ -33,6 +34,13 @@ func _ready():
 	# Conexión correcta de botones del menú de pausa
 	if boton_reanudar:
 		boton_reanudar.pressed.connect(_on_reanudar_pressed)
+		# En pausa el nivel no recibe teclas, pero el menú de pausa sí:
+		# Esc funciona como atajo del botón "Reanudar".
+		var atajo = Shortcut.new()
+		var tecla_esc = InputEventAction.new()
+		tecla_esc.action = "ui_cancel"
+		atajo.events = [tecla_esc]
+		boton_reanudar.shortcut = atajo
 	if boton_menu_pausa:
 		boton_menu_pausa.pressed.connect(_on_menu_pausa_pressed)
 
@@ -45,9 +53,8 @@ func _ready():
 	jugador2 = spawnear_jugador(AdministradorPartida.personaje_p2, 2, $Spawn2)
 
 	pantalla_victoria.visible = false
-	$HUD/Control/PantallaVictoria/Botones/VolverAJugar.pressed.connect(_on_volver_pressed)
+	$HUD/Control/PantallaVictoria/Botones/VolverAJugar.pressed.connect(_on_volver_a_jugar_pressed)
 	$HUD/Control/PantallaVictoria/Botones/Menu.pressed.connect(_on_menu_pausa_pressed)
-	$HUD/Control/PantallaVictoria/Botones/BotonVolver.pressed.connect(_on_menu_pausa_pressed)
 	$HUD/Control/PantallaVictoria/Botones/BotonVolver.pressed.connect(_on_volver_pressed)
 
 	actualizar_marcador()
@@ -62,30 +69,40 @@ func spawnear_jugador(escena: PackedScene, id: int, punto_spawn: Node2D) -> Juga
 	jugador.global_position = punto_spawn.global_position
 	add_child(jugador)
 	jugador.mirar_hacia(1 if id == 1 else -1)
+	ajustar_limites_escenario(jugador)
 
 	var barra = barra_p1 if id == 1 else barra_p2
+	barra.max_value = jugador.vida_maxima
+	barra.value = jugador.vida
 	jugador.vida_cambiada.connect(func(nueva_vida): _on_vida_cambiada(id, nueva_vida, barra))
 
 	return jugador
 
+func ajustar_limites_escenario(jugador: Jugador) -> void:
+	var mitad_visible = get_viewport_rect().size.x * 0.5 / camara.zoom.x
+	var margen = 10.0
+	jugador.limite_izquierdo = camara.global_position.x - mitad_visible + margen
+	jugador.limite_derecho = camara.global_position.x + mitad_visible - margen
+
 func congelar_jugadores(congelado: bool):
-	jugador1.set_physics_process(not congelado)
-	jugador1.set_process_input(not congelado)
-	jugador2.set_physics_process(not congelado)
-	jugador2.set_process_input(not congelado)
-	if congelado:
-		if is_instance_valid(jugador1) and jugador1.ani:
-			jugador1.ani.play("Idle")
-		if is_instance_valid(jugador2) and jugador2.ani:
-			jugador2.ani.play("Idle")
+	for jugador in [jugador1, jugador2]:
+		if not is_instance_valid(jugador):
+			continue
+		# El que acaba de caer derrotado conserva su física para llegar al suelo.
+		var derrotado = jugador.vida <= 0
+		jugador.set_physics_process(not congelado or derrotado)
+		jugador.set_process_input(not congelado)
+		if congelado and not derrotado and jugador.ani:
+			jugador.ani.play("Idle")
 
 func anuncio_ronda():
 	label_anuncio.text = "ROUND " + str(numero_ronda)
 	label_anuncio.visible = true
-	await get_tree().create_timer(1.2).timeout
+	# Los temporizadores de ronda se detienen mientras el juego está en pausa.
+	await get_tree().create_timer(1.2, false).timeout
 
 	label_anuncio.text = "FIGHT!"
-	await get_tree().create_timer(0.8).timeout
+	await get_tree().create_timer(0.8, false).timeout
 
 	label_anuncio.visible = false
 	congelar_jugadores(false)
@@ -105,13 +122,14 @@ func ronda_terminada(ganador: int):
 		rondas_p2 += 1
 
 	actualizar_marcador()
+	# Al decidirse la ronda (o la partida) nadie puede seguir moviéndose ni atacando.
+	congelar_jugadores(true)
 
 	if rondas_p1 >= RONDAS_PARA_GANAR or rondas_p2 >= RONDAS_PARA_GANAR:
-		await get_tree().create_timer(1.5).timeout
+		await get_tree().create_timer(1.5, false).timeout
 		mostrar_pantalla_victoria(ganador)
 	else:
-		congelar_jugadores(true)
-		await get_tree().create_timer(2.0).timeout
+		await get_tree().create_timer(2.0, false).timeout
 		reiniciar_ronda()
 
 func actualizar_marcador():
@@ -122,10 +140,13 @@ func reiniciar_ronda():
 	get_tree().call_group("proyectiles", "queue_free")
 
 	jugador1.reiniciar_para_ronda($Spawn1.global_position, 1)
-	barra_p1.value = 100
+	barra_p1.value = jugador1.vida
 
 	jugador2.reiniciar_para_ronda($Spawn2.global_position, -1)
-	barra_p2.value = 100
+	barra_p2.value = jugador2.vida
+
+	# El derrotado quedó con la física activa para caer: se congela a los dos hasta el "FIGHT!".
+	congelar_jugadores(true)
 
 	ronda_terminada_ya = false
 	numero_ronda += 1
@@ -140,6 +161,11 @@ func _on_volver_pressed():
 	rondas_p1 = 0
 	rondas_p2 = 0
 	get_tree().change_scene_to_file("res://Assets/Escenas/Selectorpersonaje/SelectorPersonajes.tscn")
+
+# Revancha: se recarga el nivel con los mismos personajes elegidos.
+func _on_volver_a_jugar_pressed():
+	get_tree().paused = false
+	get_tree().reload_current_scene()
 
 # --- CONTROL DE PAUSA ---
 

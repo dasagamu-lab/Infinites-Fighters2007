@@ -7,6 +7,7 @@ extends ParallaxBackground
 @onready var Grass = $Cesped
 
 func _process(delta):
-	Blue_Sky.motion_offset.x -= 0.01
-	Clouds.motion_offset.x -= 0.25
+	# Preserve la velocidad aproximada a 60 FPS, sin depender de la tasa de cuadros.
+	Blue_Sky.motion_offset.x -= 0.6 * delta
+	Clouds.motion_offset.x -= 15.0 * delta
 	

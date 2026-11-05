@@ -6,6 +6,10 @@ extends Node
 var personaje_p1 : PackedScene = null
 var personaje_p2 : PackedScene = null
 
+# true cuando se entra con el botón "Entrenamiento" del menú: el selector
+# solo pide al jugador 1 y lleva a la escena de entrenamiento.
+var modo_entrenamiento := false
+
 # Rutas de las escenas de personaje disponibles.
 # Cuando agregues un personaje nuevo, solo lo sumas aquí.
 var personajes_disponibles := {
