@@ -2,12 +2,7 @@ extends Jugador
 class_name Sierv
 
 # ==============================================================================
-# 1. CONFIGURACIÓN Y PRECARGAS
-# ==============================================================================
-# (Reservado para futuros proyectiles o recursos de Sierv)
-
-# ==============================================================================
-# 2. VARIABLES DE COMBATE Y TEMPORIZADORES
+# 1. CONFIGURACIÓN
 # ==============================================================================
 var ataque_actual : String = ""
 
@@ -40,7 +35,6 @@ func _physics_process(delta):
 		return
 	if procesar_impacto_bloqueo(delta):
 		return
-
 	if procesar_hitstun(delta):
 		return
 
@@ -53,17 +47,14 @@ func _physics_process(delta):
 		return
 
 	if Input.is_action_just_pressed(inputs["especial"]):
-		var puede_empezar = estado != EstadoFSM.ATACANDO and estado != EstadoFSM.DASH and estado != EstadoFSM.HITSTUN
+		var puede_empezar = estado != EstadoFSM.ATACANDO and estado != EstadoFSM.DASH and estado != EstadoFSM.HITSTUN \
+			and estado != EstadoFSM.ESPECIAL and estado != EstadoFSM.CHOQUE and estado != EstadoFSM.AGARRANDO \
+			and estado != EstadoFSM.AGARRADO and estado != EstadoFSM.MUERTO
 		var puede_cancelar = estado == EstadoFSM.ATACANDO and ani.frame >= frame_cancel_especial
 
 		if puede_empezar or puede_cancelar:
-			estado = EstadoFSM.ESPECIAL
-			configurar_ataque("especial")
-			desactivar_hitboxes()
-			
-			ani.animation = "Especial_P2"
-			ani.stop()
-			anim_player.play("Especial_P2")
+			iniciar_especial()
+			return
 
 	procesar_entrada_bloqueo()
 	procesar_postura()
@@ -71,11 +62,15 @@ func _physics_process(delta):
 	intentar_iniciar_dash()
 	procesar_movimiento_comun(delta)
 
-# ==============================================================================
-# 5. LÓGICA DE HABILIDADES EXCLUSIVAS
-# ==============================================================================
-# (Sierv todavía no tiene habilidades complejas como estocadas o counters. 
-# Este espacio queda reservado para futuras mecánicas únicas).
+func iniciar_especial() -> void:
+	estado = EstadoFSM.ESPECIAL
+	configurar_ataque("especial")
+	velocity = Vector2.ZERO
+	intMove = 0
+	desactivar_hitboxes()
+	ani.stop()
+	anim_player.stop()
+	anim_player.play("Especial")
 
 # ==============================================================================
 # 6. EFECTOS VISUALES Y SEÑALES
@@ -98,8 +93,8 @@ func obtener_pose_agarre(lanzando: bool) -> Array:
 func _on_animation_player_finished(anim_name: String) -> void:
 	super(anim_name)
 	match anim_name:
-		"Ataque_P2", "Especial_P2":
-			if estado == EstadoFSM.ATACANDO or estado == EstadoFSM.ESPECIAL:
+		"Ataque_P2":
+			if estado == EstadoFSM.ATACANDO:
 				estado = EstadoFSM.NORMAL
 		"Ataque_2P2":
 			if estado == EstadoFSM.ATACANDO:

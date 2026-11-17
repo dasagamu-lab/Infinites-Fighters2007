@@ -926,7 +926,8 @@ func _on_hurtbox_area_entered(area: Area2D):
 				return
 
 		# El impacto del bloqueo también protege: los golpes seguidos se siguen bloqueando.
-		if estado == EstadoFSM.BLOQUEANDO or estado == EstadoFSM.BLOQUEO_IMPACTO:
+		var ignora_bloqueo = "ignora_bloqueo" in area and area.ignora_bloqueo
+		if not ignora_bloqueo and (estado == EstadoFSM.BLOQUEANDO or estado == EstadoFSM.BLOQUEO_IMPACTO):
 			reaccionar_bloqueo(area)
 			return
 
